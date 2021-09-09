@@ -1,21 +1,39 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { Text, View, ActivityIndicator, FlatList } from "react-native";
+import styles from "./styles";
 
-export default function App() {
+const App = () => {
+  const [isFetching, setIsFetching] = useState(true);
+  const [movieList, setMovieList] = useState([]);
+
+  const fetchMovies = async () => {
+    fetch("https://reactnative.dev/movies.json")
+      .then((response) => response.json())
+      .then((json) => setMovieList(json.movies))
+      .catch((error) => console.error(error.toString()))
+      .finally(() => setIsFetching(false));
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Text style={styles.listHeader}>Movies List</Text>
+      {isFetching ? (
+        <ActivityIndicator />
+      ) : (
+        <FlatList
+          data={movieList}
+          key={({ item }) => item.id}
+          renderItem={({ item }) => (
+            <Text style={styles.movieTitle}>{item.title}</Text>
+          )}
+        />
+      )}
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
